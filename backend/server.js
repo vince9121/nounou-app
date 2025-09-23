@@ -124,8 +124,11 @@ app.delete('/supprimer/:id', async (req, res) => {
 // ==========================
 // FRONTEND STATIC
 // ==========================
+// Servir le frontend statique
 app.use(express.static(path.join(__dirname, "../frontend")));
-app.get("*", (req, res) => {
+
+// Toutes les routes non-API renvoient index.html
+app.get(/^\/(?!api|ajouter|donnees|modifier|supprimer).*$/, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
