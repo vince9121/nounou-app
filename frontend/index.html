@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Nounou</title>
+    <link href="styles.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+
+<body>
+    <h1>Web Nounou</h1>
+
+    <!-- Page Navigation -->
+    <div id="navigation" class="page active">
+        <div id="menu">
+            <button onclick="showPage('saisie')">✍️ Saisie des heures</button>
+            <button onclick="showPage('liste')">📋 Liste des interventions</button>
+        </div>
+    </div>
+
+    <div id="saisie" class="page">
+        <div class="container">
+            <button onclick="showPage('navigation')" class="btn-action btn-back"></button>
+            <h2>Saisie des heures et des KM</h2>
+            <label>Date:</label>
+            <input type="date" id="date">
+            <label>Heures de début:</label>
+            <input type="time" id="heure_debut">
+            <label>Heures de fin:</label>
+            <input type="time" id="heure_fin">
+            <label>KM parcourus:</label>
+            <input type="number" inputmode="numeric" pattern="[0-9]*" id="km">
+            <div id="saisie-message" style="color: red; margin-top: 10px;"></div>
+            <button onclick="ajouterEntree()">Ajouter</button>
+        </div> 
+    </div>
+
+    <div id="liste" class="page">
+        <div class="table-container">
+            <button onclick="showPage('navigation')" class="btn-action btn-back"></button>
+            <table border="1">
+                <caption>Liste des interventions</caption>
+
+                <thead>
+                    <tr>
+                        <th>Modifier</th>
+                        <th>
+                            Date
+                            <div>
+                                <input type="text" placeholder="Début" onfocus="(this.type='date')" onblur="(this.type='text')" id="dateDebut">
+                                <input type="text" placeholder="Fin" onfocus="(this.type='date')" onblur="(this.type='text')" id="dateFin">
+                            </div>
+                            
+                        </th>
+                        <th>Heure début</th>
+                        <th>Heure fin</th>
+                        <th>Durée</th>
+                        <th>Kilométrage</th>
+                    </tr>
+                </thead>
+
+                <tfoot>
+
+                </tfoot>
+
+                <tbody id="table-body"></tbody>
+                
+            </table>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
+
