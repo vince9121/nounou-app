@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
+const path = require("path");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,10 +15,10 @@ app.use(cors());
 // CONFIG MYSQL
 // ==========================
 const dbConfig = {
-  host: process.env.MYSQLHOST || '127.0.0.1',
-  user: process.env.MYSQLUSER || 'root',
-  password: process.env.MYSQLPASSWORD || '',
-  database: process.env.MYSQLDATABASE || 'nounou_db',
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
   port: process.env.MYSQLPORT ? Number(process.env.MYSQLPORT) : 3306,
 };
 
@@ -28,24 +29,11 @@ let pool;
 // ==========================
 (async () => {
   try {
-    // 1. Connexion pour créer la base si on est en local
-    if (dbConfig.host === '127.0.0.1' || dbConfig.host === 'localhost') {
-      const connection = await mysql.createConnection({
-        host: dbConfig.host,
-        user: dbConfig.user,
-        password: dbConfig.password,
-        port: dbConfig.port,
-      });
-      await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
-      await connection.end();
-      console.log(`✅ Base "${dbConfig.database}" vérifiée/créée en local`);
-    }
-
-    // 2. Création du pool de connexions
+    // 🔹 Sur Railway, PAS de création automatique de base → juste connexion
     pool = await mysql.createPool(dbConfig);
-    console.log("✅ Connecté à MySQL");
+    console.log("✅ Connecté à MySQL sur Railway");
 
-    // 3. Création de la table si elle n'existe pas
+    // Création de la table si elle n’existe pas
     await pool.query(`
       CREATE TABLE IF NOT EXISTS suivi (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -57,17 +45,14 @@ let pool;
       )
     `);
     console.log("✅ Table 'suivi' vérifiée/créée");
-
   } catch (err) {
     console.error("❌ Erreur MySQL:", err.message);
   }
 })();
 
 // ==========================
-// ROUTES
+// ROUTES API
 // ==========================
-
-// Ajouter une entrée
 app.post('/ajouter', async (req, res) => {
   const { date, heure_debut, heure_fin, km } = req.body;
 
@@ -91,7 +76,6 @@ app.post('/ajouter', async (req, res) => {
   }
 });
 
-// Récupérer toutes les données
 app.get('/donnees', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM suivi ORDER BY date ASC');
@@ -102,7 +86,6 @@ app.get('/donnees', async (req, res) => {
   }
 });
 
-// Modifier une entrée
 app.put('/modifier/:id', async (req, res) => {
   const { id } = req.params;
   const { date, heure_debut, heure_fin, km } = req.body;
@@ -127,7 +110,6 @@ app.put('/modifier/:id', async (req, res) => {
   }
 });
 
-// Supprimer une entrée
 app.delete('/supprimer/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -140,15 +122,9 @@ app.delete('/supprimer/:id', async (req, res) => {
 });
 
 // ==========================
-// LANCEMENT SERVEUR
+// FRONTEND STATIC
 // ==========================
-const path = require("path");
-
-// --- Servir le frontend statique ---
-// (remonte d'un niveau car le frontend est à côté de /backend)
 app.use(express.static(path.join(__dirname, "../frontend")));
-
-// Toutes les routes non-API renvoient index.html
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
