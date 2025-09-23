@@ -142,6 +142,17 @@ app.delete('/supprimer/:id', async (req, res) => {
 // ==========================
 // LANCEMENT SERVEUR
 // ==========================
+const path = require("path");
+
+// --- Servir le frontend statique ---
+// (remonte d'un niveau car le frontend est à côté de /backend)
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// Toutes les routes non-API renvoient index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
+});
+
 app.listen(port, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
 });
