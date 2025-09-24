@@ -17,7 +17,7 @@ const dbConfig = {
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT,
+  port: Number(process.env.MYSQLPORT),
 };
 
 console.log("🔍 Config DB :", dbConfig);
