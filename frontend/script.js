@@ -226,12 +226,6 @@ async function supprimerEntree(id) {
     }
 }
 
-
-async function resetData() {
-    await fetch(`${API_URL}/reset`, { method: 'DELETE' });
-    chargerDonnees();
-}
-
 chargerDonnees();
 
 function showPage(id) {

@@ -1,7 +1,16 @@
+// ==========================
+// server.js
+// ==========================
+
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const path = require("path");
+
+// 🔹 Charger .env seulement en local
+if (process.env.NODE_ENV !== "production") {
+  require('dotenv').config();
+}
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -17,7 +26,7 @@ const dbConfig = {
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
-  port: Number(process.env.MYSQLPORT),
+  port: Number(process.env.MYSQLPORT) || 3306,
 };
 
 console.log("🔍 Config DB :", dbConfig);
@@ -29,10 +38,8 @@ let pool;
 // ==========================
 (async () => {
   try {
-    // 🔹 Sur Railway, PAS de création automatique de base → juste connexion
     pool = await mysql.createPool(dbConfig);
-    
-    console.log("✅ Connecté à MySQL sur Railway");
+    console.log("✅ Connecté à MySQL");
 
     // Création de la table si elle n’existe pas
     await pool.query(`
@@ -56,7 +63,6 @@ let pool;
 // ==========================
 app.post('/ajouter', async (req, res) => {
   const { date, heure_debut, heure_fin, km } = req.body;
-
   if (!date || !heure_debut || !heure_fin || km === undefined) {
     return res.status(400).json({ error: "Champs manquants" });
   }
@@ -87,52 +93,18 @@ app.get('/donnees', async (req, res) => {
   }
 });
 
-app.put('/modifier/:id', async (req, res) => {
-  const { id } = req.params;
-  const { date, heure_debut, heure_fin, km } = req.body;
-
-  if (!date || !heure_debut || !heure_fin || km === undefined) {
-    return res.status(400).json({ error: "Champs manquants" });
-  }
-
-  const duree = Math.round(
-    (new Date(`${date} ${heure_fin}:00`) - new Date(`${date} ${heure_debut}:00`)) / 60000
-  );
-
-  try {
-    await pool.query(
-      'UPDATE suivi SET date = ?, heure_debut = ?, heure_fin = ?, duree = ?, km = ? WHERE id = ?',
-      [date, heure_debut, heure_fin, duree, km, id]
-    );
-    res.json({ success: true });
-  } catch (err) {
-    console.error("Erreur MySQL /modifier :", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/supprimer/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    await pool.query('DELETE FROM suivi WHERE id = ?', [id]);
-    res.json({ message: 'Entrée supprimée' });
-  } catch (err) {
-    console.error("Erreur MySQL /supprimer :", err.message);
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // ==========================
 // FRONTEND STATIC
 // ==========================
-// Servir le frontend statique
 app.use(express.static(path.join(__dirname, "../frontend")));
-
-// Toutes les routes non-API renvoient index.html
 app.get(/^\/(?!api|ajouter|donnees|modifier|supprimer).*$/, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
+// ==========================
+// LANCEMENT SERVEUR
+// ==========================
 app.listen(port, () => {
   console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
 });
