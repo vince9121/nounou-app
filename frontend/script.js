@@ -55,13 +55,13 @@ async function ajouterEntree() {
 }
 
 async function chargerDonnees() {
-    console.log("chargerDonnees dans script.js");
+    //console.log("chargerDonnees dans script.js");
     let response = await fetch(`${API_URL}/donnees`);
     let data = await response.json();
 
     // Vérification : data doit être un tableau
     if (!Array.isArray(data)) {
-        console.error("Données reçues invalides :", data);
+        //console.error("Données reçues invalides :", data);
         return;
     }
 
@@ -71,7 +71,7 @@ async function chargerDonnees() {
 
     // Filtre les données si les dates sont renseignées
     let filteredData = data.filter(entry => {
-        console.log("chargerDonnees: filtrage des données");
+        //console.log("chargerDonnees: filtrage des données");
         if (dateDebut && entry.date <= dateDebut) return false;
         if (dateFin && entry.date >= dateFin) return false;
         return true;
@@ -140,7 +140,7 @@ async function chargerDonnees() {
 }
 
 async function modifierEntree(id) {
-    console.log("modifierEntree dans script.js");
+    //console.log("modifierEntree dans script.js");
 
     // Récupère les données de l'entrée à modifier
     let response = await fetch(`${API_URL}/donnees`);
@@ -263,7 +263,7 @@ function minutesToHHMM(minutes) {
 
 // formatage de la date avant affichage
 function formatDateFR(dateStr) {
-    console.log("formatDateFR: ", dateStr);
+    //console.log("formatDateFR: ", dateStr);
     const jours = ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
     const d = new Date(dateStr);
     const jour = d.getDate().toString().padStart(2, '0');
