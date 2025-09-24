@@ -20,7 +20,7 @@ const dbConfig = {
   port: Number(process.env.MYSQLPORT),
 };
 
-
+console.log("🔍 Config DB :", dbConfig);
 
 let pool;
 
@@ -31,7 +31,7 @@ let pool;
   try {
     // 🔹 Sur Railway, PAS de création automatique de base → juste connexion
     pool = await mysql.createPool(dbConfig);
-    console.log("🔍 Config DB :", dbConfig);
+    
     console.log("✅ Connecté à MySQL sur Railway");
 
     // Création de la table si elle n’existe pas
