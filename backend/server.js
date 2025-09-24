@@ -22,6 +22,8 @@ const dbConfig = {
   port: process.env.MYSQLPORT ? Number(process.env.MYSQLPORT) : 3306,
 };
 
+console.log("🔍 Config DB :", dbConfig);
+
 let pool;
 
 // ==========================
