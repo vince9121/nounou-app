@@ -1,12 +1,10 @@
-require('dotenv').config();
-
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const path = require("path");
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(cors());
@@ -19,7 +17,7 @@ const dbConfig = {
   user: process.env.MYSQLUSER,
   password: process.env.MYSQLPASSWORD,
   database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT ? Number(process.env.MYSQLPORT) : 3306,
+  port: process.env.MYSQLPORT,
 };
 
 console.log("🔍 Config DB :", dbConfig);
