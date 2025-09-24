@@ -59,6 +59,12 @@ async function chargerDonnees() {
     let response = await fetch(`${API_URL}/donnees`);
     let data = await response.json();
 
+    // Vérification : data doit être un tableau
+    if (!Array.isArray(data)) {
+        console.error("Données reçues invalides :", data);
+        return;
+    }
+
     // Récupère les valeurs des filtres
     const dateDebut = document.getElementById("dateDebut").value;
     const dateFin = document.getElementById("dateFin").value;
