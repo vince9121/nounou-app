@@ -1,5 +1,5 @@
 const API_URL = window.location.hostname === "localhost"
-  ? "http://localhost:8080"
+  ? "http://localhost:3000"
   : "https://nounou-app-production.up.railway.app";
 
 async function ajouterEntree() {

@@ -1,11 +1,12 @@
 // ==========================
 // server.js
+// Backend nounou app
 // ==========================
 
 const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
-const path = require("path");
+const path = require('path');
 
 // 🔹 Charger .env seulement en local
 if (process.env.NODE_ENV !== "production") {
@@ -22,14 +23,12 @@ app.use(cors());
 // CONFIG MYSQL
 // ==========================
 const dbConfig = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
+  host: process.env.MYSQLHOST || '127.0.0.1',
+  user: process.env.MYSQLUSER || 'root',
+  password: process.env.MYSQLPASSWORD || '',
+  database: process.env.MYSQLDATABASE || 'nounou_db',
   port: Number(process.env.MYSQLPORT) || 3306,
 };
-
-console.log("🔍 Config DB :", dbConfig);
 
 let pool;
 
@@ -38,8 +37,20 @@ let pool;
 // ==========================
 (async () => {
   try {
+    // Connexion simple pour créer la DB si besoin
+    const connection = await mysql.createConnection({
+      host: dbConfig.host,
+      user: dbConfig.user,
+      password: dbConfig.password,
+      port: dbConfig.port,
+    });
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${dbConfig.database}\``);
+    await connection.end();
+
+    // Pool sur la DB
     pool = await mysql.createPool(dbConfig);
-    console.log("✅ Connecté à MySQL");
+
+    console.log("✅ Connecté à MySQL et base vérifiée");
 
     // Création de la table si elle n’existe pas
     await pool.query(`
@@ -61,6 +72,8 @@ let pool;
 // ==========================
 // ROUTES API
 // ==========================
+
+// Ajouter une entrée
 app.post('/ajouter', async (req, res) => {
   const { date, heure_debut, heure_fin, km } = req.body;
   if (!date || !heure_debut || !heure_fin || km === undefined) {
@@ -83,6 +96,7 @@ app.post('/ajouter', async (req, res) => {
   }
 });
 
+// Récupérer toutes les données
 app.get('/donnees', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM suivi ORDER BY date ASC');
@@ -93,12 +107,49 @@ app.get('/donnees', async (req, res) => {
   }
 });
 
+// Modifier une entrée
+app.put('/modifier/:id', async (req, res) => {
+  const { id } = req.params;
+  const { date, heure_debut, heure_fin, km } = req.body;
+  const duree = Math.round(
+    (new Date(`${date} ${heure_fin}:00`) - new Date(`${date} ${heure_debut}:00`)) / 60000
+  );
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE suivi SET date = ?, heure_debut = ?, heure_fin = ?, duree = ?, km = ? WHERE id = ?',
+      [date, heure_debut, heure_fin, duree, km, id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Entrée non trouvée" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Erreur MySQL /modifier :", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Supprimer une entrée
+app.delete('/supprimer/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [result] = await pool.query('DELETE FROM suivi WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Entrée non trouvée" });
+    }
+    res.json({ message: "Entrée supprimée avec succès" });
+  } catch (err) {
+    console.error("Erreur MySQL /supprimer :", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ==========================
 // FRONTEND STATIC
 // ==========================
 app.use(express.static(path.join(__dirname, "../frontend")));
-app.get(/^\/(?!api|ajouter|donnees|modifier|supprimer).*$/, (req, res) => {
+app.get(/^\/(?!api).*$/, (req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
