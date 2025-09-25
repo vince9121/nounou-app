@@ -1,4 +1,6 @@
-const API_URL = "https://nounou-app-production.up.railway.app"
+const API_URL = window.location.hostname === "localhost"
+  ? "http://localhost:8080"
+  : "https://nounou-app-production.up.railway.app";
 
 async function ajouterEntree() {
     let date = document.getElementById("date").value;
