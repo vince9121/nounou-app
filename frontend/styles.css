@@ -149,7 +149,7 @@ caption {
 
 .table-container {
 	border: 5px solid #224854;
-	display: flex;
+	display: block;
 	flex-direction: column;
 	/* max-width: 500px; */
 	margin: 10px;
@@ -157,15 +157,17 @@ caption {
 	padding: 10px;
 	border-radius: 20px;
 	background-color: #316879;
-	overflow: auto;
+	overflow-x:auto;
+	overflow-y: hidden;
 }
 
-table {
-    margin:auto;
-    width: 90vw;
-    border-collapse: collapse; /* Supprime les espaces entre les bordures */
-    table-layout: fixed;
+.table-container table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* 🔹 force le scroll si l’écran est trop petit */
 }
+
+
 
 th, td {
     border: 1px #224854 solid;
