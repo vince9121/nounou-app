@@ -157,6 +157,7 @@ caption {
 	padding: 10px;
 	border-radius: 20px;
 	background-color: #316879;
+	overflow: auto;
 }
 
 table {
