@@ -2,6 +2,17 @@ const API_URL = window.location.hostname === "localhost"
   ? "http://localhost:3000"
   : "https://nounou-app-production.up.railway.app";
 
+// Réveil de la base de données MySQL au chargement de la page
+async function wakeDB() {
+    try {
+        console.log("Réveil de la base MySQL...");
+        await fetch(`${API_URL}/donnees`, { method: "GET" });
+        console.log("Base réveillée !");
+    } catch (err) {
+        console.error("Erreur lors du réveil :", err);
+    }
+}
+  
 async function ajouterEntree() {
     let date = document.getElementById("date").value;
     let heure_debut = document.getElementById("heure_debut").value;
@@ -57,7 +68,7 @@ async function ajouterEntree() {
 }
 
 async function chargerDonnees() {
-    //console.log("chargerDonnees dans script.js");
+    console.log("chargerDonnees dans script.js");
     let response = await fetch(`${API_URL}/donnees`);
     let data = await response.json();
 
@@ -272,5 +283,3 @@ function formatDateFR(dateStr) {
 // Application du filtrage des dates dès que les dates sont modifiées
 document.getElementById("dateDebut").addEventListener("change", chargerDonnees);
 document.getElementById("dateFin").addEventListener("change", chargerDonnees);
-
-// mysql -h mysql.railway.internal -u root -p AeCHnpzSCulmJKEcXCGPjFrwFTtDecnD railway -P 3306
