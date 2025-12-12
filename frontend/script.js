@@ -2,16 +2,6 @@ const API_URL = window.location.hostname === "localhost"
   ? "http://localhost:3000"
   : "https://nounou-app-production.up.railway.app";
 
-// Réveil de la base de données MySQL au chargement de la page
-async function wakeDB() {
-    try {
-        console.log("Réveil de la base MySQL...");
-        await fetch(`${API_URL}/donnees`, { method: "GET" });
-        console.log("Base réveillée !");
-    } catch (err) {
-        console.error("Erreur lors du réveil :", err);
-    }
-}
   
 async function ajouterEntree() {
     let date = document.getElementById("date").value;

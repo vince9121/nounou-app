@@ -73,6 +73,11 @@ let pool;
 // ROUTES API
 // ==========================
 
+// Route de reveil de la base et de l'application
+app.get("/ping", (req, res) => {
+    res.json({ status: "ok" });
+});
+
 // Ajouter une entrée
 app.post('/ajouter', async (req, res) => {
   const { date, heure_debut, heure_fin, km } = req.body;

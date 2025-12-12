@@ -13,6 +13,13 @@
 </head>
 
 <body>
+    <script>
+        window.addEventListener("load", () => {
+            fetch("https://nounou-app-production.up.railway.app/ping")
+            .catch(() => {}); // Pas grave si ça échoue, on ignore
+        });
+    </script>
+
     <h1>Web Nounou</h1>
 
     <!-- Page Navigation -->
@@ -75,9 +82,7 @@
     </div>
 
 <script src="script.js"></script>
-<script>
-    wakeDB();
-</script>
+
 
 </body>
 </html>
