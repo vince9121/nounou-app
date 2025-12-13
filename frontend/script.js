@@ -229,7 +229,7 @@ async function supprimerEntree(id) {
     }
 }
 
-chargerDonnees();
+//chargerDonnees();
 
 function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));

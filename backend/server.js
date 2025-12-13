@@ -76,6 +76,7 @@ let pool;
 // Route de reveil de la base et de l'application
 app.get("/ping", (req, res) => {
     res.json({ status: "ok" });
+    console.log("Ping reçu - application réveillée");
 });
 
 // Ajouter une entrée
