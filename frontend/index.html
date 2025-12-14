@@ -15,8 +15,8 @@
 <body>
     <script>
         window.addEventListener("load", () => {
-            fetch("https://nounou-app-production.up.railway.app/ping")
-            .catch(() => {}); // Pas grave si ça échoue, on ignore
+            console.log("Page chargée, envoi du ping pour réveiller le backend...");
+            fetch("https://nounou-app-production.up.railway.app/ping").catch(() => {}); // Pas grave si ça échoue, on ignore
         });
     </script>
 
