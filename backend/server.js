@@ -74,9 +74,13 @@ let pool;
 // ==========================
 
 // Route de reveil de la base et de l'application
-app.get("/ping", (req, res) => {
+app.get("/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
     res.json({ status: "ok" });
-    console.log("Ping reçu - application réveillée");
+  } catch (err) {
+    res.status(503).json({ status: "db_sleeping" });
+  }
 });
 
 // Ajouter une entrée
