@@ -30,7 +30,6 @@ const dbConfig = {
   port: Number(process.env.MYSQLPORT) || 3306,
 };
 
-let pool;
 
 // ==========================
 // INITIALISATION DB
@@ -69,6 +68,21 @@ let pool;
   }
 })();
 
+
+// ==========================
+// FONCTIONS
+// ==========================
+async function getConnection() {
+  return await mysql.createConnection({
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT || 3306,
+    ssl: { rejectUnauthorized: false } // IMPORTANT Railway
+  });
+}
+
 async function getPool() {
   if (!pool) {
     pool = mysql.createPool(dbConfig);
@@ -83,51 +97,50 @@ async function getPool() {
 // Route de reveil de la base et de l'application
 app.get("/health", async (req, res) => {
   try {
-    const p = await getPool();
-    await p.query("SELECT 1");
+    const conn = await getConnection();
+    await conn.query("SELECT 1");
+    await conn.end();
     res.json({ status: "ok" });
   } catch (err) {
-    console.error("HEALTH CHECK:", err.message);
-    pool = null; // 🔥 on force la recréation
-    res.status(503).json({ status: "db_sleeping" });
+    res.status(503).json({ status: "sleeping" });
   }
 });
 
 // Ajouter une entrée
 app.post('/ajouter', async (req, res) => {
   const { date, heure_debut, heure_fin, km } = req.body;
-  if (!date || !heure_debut || !heure_fin || km === undefined) {
-    return res.status(400).json({ error: "Champs manquants" });
-  }
 
-  const duree = Math.round(
-    (new Date(`${date} ${heure_fin}:00`) - new Date(`${date} ${heure_debut}:00`)) / 60000
-  );
+  const duree = (new Date(`${date} ${heure_fin}`) - new Date(`${date} ${heure_debut}`)) / 60000;
 
+  let conn;
   try {
-    const p = await getPool();
-    const [result] = await p.query(
+    conn = await getConnection();
+    const [result] = await conn.query(
       'INSERT INTO suivi (date, heure_debut, heure_fin, duree, km) VALUES (?, ?, ?, ?, ?)',
       [date, heure_debut, heure_fin, duree, km]
     );
     res.json({ id: result.insertId });
   } catch (err) {
-    console.error("Erreur MySQL /ajouter :", err.message);
-    pool = null; // 🔥 on force la recréation
-    res.status(503).json({ status: "db_sleeping" });
+    res.status(503).json({ error: "db_unavailable" });
+  } finally {
+    if (conn) await conn.end();
   }
 });
 
 // Récupérer toutes les données
 app.get('/donnees', async (req, res) => {
+  let conn;
   try {
-    const p = await getPool();
-    const [rows] = await p.query('SELECT * FROM suivi ORDER BY date ASC');
+    conn = await getConnection();
+    const [rows] = await conn.query(
+      'SELECT * FROM suivi ORDER BY date ASC'
+    );
     res.json(rows);
   } catch (err) {
-    console.error("Erreur MySQL /donnees :", err.message);
-    pool = null; // 🔥 reset
-    res.status(503).json({ error: "db_not_ready" });
+    console.error(err.message);
+    res.status(503).json({ error: "db_unavailable" });
+  } finally {
+    if (conn) await conn.end();
   }
 });
 
@@ -139,9 +152,11 @@ app.put('/modifier/:id', async (req, res) => {
     (new Date(`${date} ${heure_fin}:00`) - new Date(`${date} ${heure_debut}:00`)) / 60000
   );
 
+let conn;
+
   try {
-    const p = await getPool();
-    const [result] = await p.query(
+    conn = await getConnection();
+    const [result] = await conn.query(
       'UPDATE suivi SET date = ?, heure_debut = ?, heure_fin = ?, duree = ?, km = ? WHERE id = ?',
       [date, heure_debut, heure_fin, duree, km, id]
     );
@@ -153,6 +168,8 @@ app.put('/modifier/:id', async (req, res) => {
     console.error("Erreur MySQL /modifier :", err.message);
     pool = null; // 🔥 reset
     res.status(503).json({ error: "db_not_ready" });
+  } finally {
+    if (conn) await conn.end();
   }
 });
 
@@ -160,8 +177,9 @@ app.put('/modifier/:id', async (req, res) => {
 app.delete('/supprimer/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const p = await getPool();
-    const [result] = await p.query('DELETE FROM suivi WHERE id = ?', [id]);
+    let conn;
+    conn = await getConnection();
+    const [result] = await conn.query('DELETE FROM suivi WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Entrée non trouvée" });
     }
@@ -170,6 +188,8 @@ app.delete('/supprimer/:id', async (req, res) => {
     console.error("Erreur MySQL /supprimer :", err.message);
     pool = null; // 🔥 reset
     res.status(503).json({ error: "db_not_ready" });
+  } finally {
+    if (conn) await conn.end();
   }
 });
 
