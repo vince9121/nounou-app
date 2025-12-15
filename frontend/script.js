@@ -1,6 +1,6 @@
 const API_URL = window.location.hostname === "localhost"
-  ? "http://localhost:3000"
-  : "https://nounou-app-production.up.railway.app";
+  ? "http://localhost:8080"
+  : window.location.origin;
 
 async function waitForDatabase() {
     const loader = document.getElementById("loader");
@@ -297,3 +297,9 @@ function formatDateFR(dateStr) {
 // Application du filtrage des dates dès que les dates sont modifiées
 document.getElementById("dateDebut").addEventListener("change", chargerDonnees);
 document.getElementById("dateFin").addEventListener("change", chargerDonnees);
+
+// Logique de démarrage
+window.addEventListener("load", async () => {
+    await waitForDatabase();
+    await chargerDonnees();
+});

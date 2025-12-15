@@ -76,9 +76,12 @@ let pool;
 // Route de reveil de la base et de l'application
 app.get("/health", async (req, res) => {
   try {
+    if (!pool) {
+      return res.status(503).json({ status: "initializing" });
+    }
     await pool.query("SELECT 1");
     res.json({ status: "ok" });
-  } catch (err) {
+  } catch {
     res.status(503).json({ status: "db_sleeping" });
   }
 });
