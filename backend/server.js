@@ -69,6 +69,13 @@ let pool;
   }
 })();
 
+async function getPool() {
+  if (!pool) {
+    pool = mysql.createPool(dbConfig);
+  }
+  return pool;
+}
+
 // ==========================
 // ROUTES API
 // ==========================
@@ -76,12 +83,12 @@ let pool;
 // Route de reveil de la base et de l'application
 app.get("/health", async (req, res) => {
   try {
-    if (!pool) {
-      return res.status(503).json({ status: "initializing" });
-    }
-    await pool.query("SELECT 1");
+    const p = await getPool();
+    await p.query("SELECT 1");
     res.json({ status: "ok" });
-  } catch {
+  } catch (err) {
+    console.error("HEALTH CHECK:", err.message);
+    pool = null; // 🔥 on force la recréation
     res.status(503).json({ status: "db_sleeping" });
   }
 });
@@ -98,25 +105,29 @@ app.post('/ajouter', async (req, res) => {
   );
 
   try {
-    const [result] = await pool.query(
+    const p = await getPool();
+    const [result] = await p.query(
       'INSERT INTO suivi (date, heure_debut, heure_fin, duree, km) VALUES (?, ?, ?, ?, ?)',
       [date, heure_debut, heure_fin, duree, km]
     );
     res.json({ id: result.insertId });
   } catch (err) {
     console.error("Erreur MySQL /ajouter :", err.message);
-    res.status(500).json({ error: err.message });
+    pool = null; // 🔥 on force la recréation
+    res.status(503).json({ status: "db_sleeping" });
   }
 });
 
 // Récupérer toutes les données
 app.get('/donnees', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM suivi ORDER BY date ASC');
+    const p = await getPool();
+    const [rows] = await p.query('SELECT * FROM suivi ORDER BY date ASC');
     res.json(rows);
   } catch (err) {
     console.error("Erreur MySQL /donnees :", err.message);
-    res.status(500).json({ error: err.message });
+    pool = null; // 🔥 reset
+    res.status(503).json({ error: "db_not_ready" });
   }
 });
 
@@ -129,7 +140,8 @@ app.put('/modifier/:id', async (req, res) => {
   );
 
   try {
-    const [result] = await pool.query(
+    const p = await getPool();
+    const [result] = await p.query(
       'UPDATE suivi SET date = ?, heure_debut = ?, heure_fin = ?, duree = ?, km = ? WHERE id = ?',
       [date, heure_debut, heure_fin, duree, km, id]
     );
@@ -139,7 +151,8 @@ app.put('/modifier/:id', async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error("Erreur MySQL /modifier :", err.message);
-    res.status(500).json({ error: err.message });
+    pool = null; // 🔥 reset
+    res.status(503).json({ error: "db_not_ready" });
   }
 });
 
@@ -147,14 +160,16 @@ app.put('/modifier/:id', async (req, res) => {
 app.delete('/supprimer/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const [result] = await pool.query('DELETE FROM suivi WHERE id = ?', [id]);
+    const p = await getPool();
+    const [result] = await p.query('DELETE FROM suivi WHERE id = ?', [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Entrée non trouvée" });
     }
     res.json({ message: "Entrée supprimée avec succès" });
   } catch (err) {
     console.error("Erreur MySQL /supprimer :", err.message);
-    res.status(500).json({ error: err.message });
+    pool = null; // 🔥 reset
+    res.status(503).json({ error: "db_not_ready" });
   }
 });
 
