@@ -182,6 +182,7 @@ async function modifierEntree(id) {
     showPage('saisie');
 
     // Pré-remplit les champs
+    console.log("Pré-remplissage des champs pour l'entrée ID et date:", id, " / ", entry.date);
     document.getElementById("date").value = entry.date;
     document.getElementById("heure_debut").value = entry.heure_debut;
     document.getElementById("heure_fin").value = entry.heure_fin;
