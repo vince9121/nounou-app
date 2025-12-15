@@ -2,7 +2,31 @@ const API_URL = window.location.hostname === "localhost"
   ? "http://localhost:3000"
   : "https://nounou-app-production.up.railway.app";
 
-  
+async function waitForDatabase() {
+    const loader = document.getElementById("loader");
+    const bar = document.getElementById("progress-bar");
+
+    let progress = 0;
+
+    while (true) {
+        try {
+            const res = await fetch(`${API_URL}/health`);
+            if (res.ok) {
+                bar.style.width = "100%";
+                setTimeout(() => loader.style.display = "none", 300);
+                console.log("✅ Base réveillée");
+                return;
+            }
+        } catch (e) {}
+
+        // Progression visuelle contrôlée (max 90%)
+        progress = Math.min(progress + Math.random() * 15, 90);
+        bar.style.width = `${progress}%`;
+
+        await new Promise(r => setTimeout(r, 2000));
+    }
+}
+
 async function ajouterEntree() {
     let date = document.getElementById("date").value;
     let heure_debut = document.getElementById("heure_debut").value;

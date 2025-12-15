@@ -14,11 +14,21 @@
 
 <body>
     <script>
-        window.addEventListener("load", () => {
-            console.log("Page chargée, envoi du ping pour réveiller le backend...");
-            fetch("https://nounou-app-production.up.railway.app/ping").catch(() => {}); // Pas grave si ça échoue, on ignore
+        window.addEventListener("load", async () => {
+            await waitForDatabase();
+            chargerDonnees();
         });
     </script>
+
+    <div id="loader" class="loader">
+        <div class="loader-box">
+            <div class="loader-text">Réveil de la base de données…</div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
 
     <h1>Web Nounou</h1>
 
