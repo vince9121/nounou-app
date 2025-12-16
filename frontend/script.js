@@ -29,6 +29,7 @@ async function waitForDatabase() {
 
 async function ajouterEntree() {
     let date = document.getElementById("date").value;
+    console.log("Date sélectionnée :", date);
     let heure_debut = document.getElementById("heure_debut").value;
     let heure_fin = document.getElementById("heure_fin").value;
     let km = document.getElementById("km").value;
@@ -167,7 +168,7 @@ async function chargerDonnees() {
 }
 
 async function modifierEntree(id) {
-    //console.log("modifierEntree dans script.js");
+    console.log("modifierEntree dans script.js");
 
     // Récupère les données de l'entrée à modifier
     let response = await fetch(`${API_URL}/donnees`);
@@ -183,7 +184,7 @@ async function modifierEntree(id) {
 
     // Pré-remplit les champs
     console.log("Pré-remplissage des champs pour l'entrée ID et date:", id, " / ", entry.date);
-    document.getElementById("date").value = new Date(entry.date).toISOString().slice(0, 10);
+    document.getElementById("date").value = entry.date;
     document.getElementById("heure_debut").value = entry.heure_debut;
     document.getElementById("heure_fin").value = entry.heure_fin;
     document.getElementById("km").value = entry.km;
@@ -254,8 +255,7 @@ async function supprimerEntree(id) {
     }
 }
 
-//chargerDonnees();
-
+// Navigation entre les pages
 function showPage(id) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(id).classList.add('active');

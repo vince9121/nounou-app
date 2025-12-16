@@ -121,7 +121,7 @@ app.get('/donnees', async (req, res) => {
   try {
     conn = await getConnection();
     const [rows] = await conn.query(
-      'SELECT * FROM suivi ORDER BY date ASC'
+      'SELECT id, DATE_FORMAT(date, "%Y-%m-%d") AS date, heure_debut, heure_fin, duree, km FROM suivi ORDER BY date ASC'
     );
     res.json(rows);
   } catch (err) {
@@ -135,7 +135,7 @@ app.get('/donnees', async (req, res) => {
 app.put('/modifier/:id', async (req, res) => {
   const { id } = req.params;
   const { date, heure_debut, heure_fin, km } = req.body;
-
+  
   const duree = Math.round(
     (new Date(`${date} ${heure_fin}`) - new Date(`${date} ${heure_debut}`)) / 60000
   );
