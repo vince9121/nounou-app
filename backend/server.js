@@ -10,7 +10,9 @@ const path = require('path');
 
 // 🔹 Charger .env seulement en local
 if (process.env.NODE_ENV !== "production") {
-  require('dotenv').config();
+  require('dotenv').config({
+    path: path.resolve(__dirname, '../.env')
+  });
 }
 
 const app = express();
