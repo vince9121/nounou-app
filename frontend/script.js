@@ -101,8 +101,8 @@ async function chargerDonnees() {
     // Filtre les données si les dates sont renseignées
     let filteredData = data.filter(entry => {
         //console.log("chargerDonnees: filtrage des données");
-        if (dateDebut && entry.date <= dateDebut) return false;
-        if (dateFin && entry.date >= dateFin) return false;
+        if (dateDebut && entry.date < dateDebut) return false;
+        if (dateFin && entry.date > dateFin) return false;
         return true;
     });
 
@@ -338,7 +338,6 @@ function getMonday(dateStr) {
     d.setDate(d.getDate() - day + 1);
     return d.toISOString().split("T")[0];
 }
-
 
 // Initialisation des filtres de date au mois courant
 function initFiltresMoisCourant() {
