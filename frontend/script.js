@@ -325,6 +325,7 @@ document.getElementById("dateFin").addEventListener("change", chargerDonnees);
 
 // Logique de démarrage
 window.addEventListener("load", async () => {
+    initFiltresMoisCourant();
     await waitForDatabase();
     await chargerDonnees();
 });
@@ -336,4 +337,26 @@ function getMonday(dateStr) {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - day + 1);
     return d.toISOString().split("T")[0];
+}
+
+
+// Initialisation des filtres de date au mois courant
+function initFiltresMoisCourant() {
+    const now = new Date();
+
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    document.getElementById("dateDebut").value =
+        toLocalDateInputValue(firstDay);
+
+    document.getElementById("dateFin").value =
+        toLocalDateInputValue(lastDay);
+}
+
+function toLocalDateInputValue(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
 }
