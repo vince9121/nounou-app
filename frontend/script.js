@@ -96,6 +96,7 @@ async function chargerDonnees() {
     // Récupère les valeurs des filtres
     const dateDebut = document.getElementById("dateDebut").value;
     const dateFin = document.getElementById("dateFin").value;
+    console.log("Filtres appliqués - Date début :", dateDebut, " Date fin :", dateFin);
 
     // Filtre les données si les dates sont renseignées
     let filteredData = data.filter(entry => {
@@ -112,6 +113,18 @@ async function chargerDonnees() {
     tableBody.innerHTML = "";
     let totalDuree = 0;
     let totalKm = 0;
+
+    const displayedWeeks = {};
+    const weeklyTotals = {};
+
+    filteredData.forEach(entry => {
+        const monday = getMonday(entry.date);
+        if (!weeklyTotals[monday]) {
+            weeklyTotals[monday] = 0;
+        }
+            weeklyTotals[monday] += entry.duree;
+    });
+
     filteredData.forEach(entry => {
         let row = tableBody.insertRow();
         // 1ère cellule : Boutons Modifier & Supprimer
@@ -143,6 +156,16 @@ async function chargerDonnees() {
         row.insertCell(4).textContent = dureeHHMM;
         row.insertCell(5).textContent = entry.km;
 
+        const monday = getMonday(entry.date);
+
+        if (!displayedWeeks[monday]) {
+            // Première ligne de la semaine → on affiche le total
+            row.insertCell(6).textContent = minutesToHHMM(weeklyTotals[monday]);
+            displayedWeeks[monday] = true;
+        } else {
+            // Lignes suivantes → cellule vide
+            row.insertCell(6).textContent = "";
+        }
         // Calcul des totaux
         totalDuree += entry.duree;
         totalKm += Number(entry.km);
@@ -161,6 +184,7 @@ async function chargerDonnees() {
                 <th>-</th>
                 <th>${dureeTotaleHHMM}</th>
                 <th>${totalKm}</th>
+                <th>-</th>
             </tr>
         `;
     }
@@ -304,3 +328,12 @@ window.addEventListener("load", async () => {
     await waitForDatabase();
     await chargerDonnees();
 });
+
+// Obtenir le lundi de la semaine d'une date donnée
+function getMonday(dateStr) {
+    const d = new Date(dateStr);
+    const day = d.getDay() || 7; // dimanche = 7
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - day + 1);
+    return d.toISOString().split("T")[0];
+}

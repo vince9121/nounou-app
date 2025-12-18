@@ -198,6 +198,7 @@ th input[type="text"], th input[type="date"] {
     width: 70px; /* Largeur fixe */
 }
 
+
 .loader {
   position: fixed;
   inset: 0;
@@ -234,3 +235,4 @@ th input[type="text"], th input[type="date"] {
   background: linear-gradient(90deg, #22c55e, #4ade80);
   transition: width 0.4s ease;
 }
+
